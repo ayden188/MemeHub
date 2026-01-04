@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="p3.png">
+    <link rel="stylesheet" href="style.css">
+    <title>Memhub</title>
+</head>
+<body>
+<header>
+<nav class="head">
+<div class="logo" style="display: flex; align-items: flex-end; cursor: pointer; gap: 10px;">
+  <a href=""> <img src="p3.png" alt="" style="width: 60px;"></a>
+  <a href="" style="color: white; text-decoration: none;"><h1>Meme<span style="color: var(--primary);">Hub</span></h1></a> 
+</div>
+<input type="text" placeholder=" 🔎✨ Chercher un mème">
+
+<div class="lien">
+    <ul>
+<li class="active">Acceuil</li>
+<li>Trending</li>
+    </ul>
+</div>
+</nav>
+
+
+</header>    
+<main class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-group">
+            <span class="brand-name">Meme<span>Hub</span></span>
+        </div>
+    </div>
+
+    <nav class="side-nav">
+        <p class="nav-label">Menu Principal</p>
+        <button class="nav-item active" id="btn-trending">
+            <span class="nav-icon">🔥</span>
+            <span class="nav-text">Tendances</span>
+        </button>
+        <button class="nav-item" id="btn-top">
+            <span class="nav-icon">🏆</span>
+            <span class="nav-text">Top 24h</span>
+        </button>
+        <button class="nav-item" id="btn-random">
+            <span class="nav-icon">🎲</span>
+            <span class="nav-text">Surprise Me</span>
+        </button>
+
+        <p class="nav-label">Ma Bibliothèque</p>
+        <button class="nav-item" id="btn-favorites">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-text">Mes Favoris</span>
+        </button>
+        <button class="nav-item" id="btn-upload" style="background: #00ff8822; border: 1px solid #00ff88; margin-bottom: 20px;">
+    <span class="nav-icon">📤</span>
+    <span class="nav-text" style="color: #009450; font-weight: bold;">Publier un GIF</span>
+</button>
+        <button class="nav-item">
+            <span class="nav-icon">🕒</span>
+            <span class="nav-text">Historique</span>
+        </button>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="theme-switch-wrapper">
+    <label class="theme-switch" for="checkbox">
+        <input type="checkbox" id="checkbox" />
+        <div class="slider round">
+            <span class="icon-sun">☀️</span>
+            <span class="icon-moon">🌙</span>
+        </div>
+    </label>
+    <span class="nav-text">Mode Sombre</span>
+</div>
+    </div>
+</aside>
+
+    <section class="hero-content">
+        <div class="hero-lien">
+            <div>
+             <h2 id="dynamic-greeting" style="margin-bottom: 10px;">Today flow</h2>
+<p id="dynamic-subtext" style="color: #c6c6c6;">Le meilleur de l'humour, version pro.</p>
+    </div>
+   
+    
+    </div>
+   
+
+
+        <div id="meme-container" class="meme-grid">
+            <div class="grid">
+                <img src="" alt="">
+            </div>
+<div class="text" style="padding: 20px;"><h4></h4>
+    <br>
+ <button>♡ </button>   <button>⌲</button></div>
+                 
+         </div>
+
+         <div id="scroll-anchor" style="height: 20px;"></div>
+
+
+
+
+<section id="upload-section" class="upload-container" style="display: none;">
+    <div class="upload-card">
+        <h3>Partage ton meilleur GIF 🚀</h3>
+        
+        <div id="drop-zone" class="drop-zone">
+            <span class="drop-icon">📁</span>
+            <p>Glisse ton GIF ici ou <span>parcourir</span></p>
+            <input type="file" id="file-input" accept="image/gif" hidden>
+        </div>
+
+      <div id="preview-container" class="preview-hidden">
+    <img id="gif-preview" src="" alt="Aperçu">
+    <div class="upload-form">
+        <input type="text" id="meme-title" placeholder="Donne un titre épique...">
+        
+        <div id="progress-container" style="display: none; margin: 20px 0;">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p id="progress-text" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Envoi en cours... 0%</p>
+        </div>
+
+        <button id="submit-upload" class="publish-btn">Publier sur MemeHub</button>
+    </div>
+</div>
+    </div>
+</section>
+    </section>
+
+
+
+</main>
+
+<script src="index.js"></script>
+</body>
+</html>
