@@ -1,359 +1,314 @@
-/* █████╗  ██████╗ ██╗ ██████╗ ███╗   ██╗
+/* ██████╗ ██████╗ ██╗ ██████╗ ███╗   ██╗
    ██╔══██╗██╔══██╗██║██╔═══██╗████╗  ██║
    ██║  ██║██████╔╝██║██║   ██║██╔██╗ ██║
    ██║  ██║██╔══██╗██║██║   ██║██║╚██╗██║
    ██████╔╝██║  ██║██║╚██████╔╝██║ ╚████║
-   by AWOESSO Eli */
+   ORION MEME ENGINE - FULL VERSION WITH WEB SHARE
+*/
 
-// --- CONFIGURATION ---
-const API_KEY = '1FkwOfmkrdfxmUXBW7KSgsAdLIcRbmOK'; 
-const container = document.getElementById('meme-container');
-const uploadSection = document.getElementById('upload-section');
-const scrollAnchor = document.getElementById('scroll-anchor');
+const CONFIG = {
+    API_KEY: '1FkwOfmkrdfxmUXBW7KSgsAdLIcRbmOK',
+    LIMIT: 12,
+    ENDPOINTS: {
+        trending: 'https://api.giphy.com/v1/gifs/trending',
+        search: 'https://api.giphy.com/v1/gifs/search',
+        random: 'https://api.giphy.com/v1/gifs/random'
+    }
+};
 
-let currentOffset = 0;
-let isLoading = false;
-let currentSearch = "";
-const MAX_MEMES_IN_DOM = 20;
+const STATE = {
+    container: document.getElementById('meme-container'),
+    scrollAnchor: document.getElementById('scroll-anchor'),
+    title: document.getElementById('dynamic-greeting'),
+    subtext: document.getElementById('dynamic-subtext'),
+    currentOffset: 0,
+    isLoading: false,
+    currentSearch: ""
+};
 
 // --- 1. INITIALISATION ---
 document.addEventListener("DOMContentLoaded", () => {
-    updateGreeting();
-    fetchMemes(true);
+    initTheme();
     initNavigation();
     initSearch();
-    initUploadLogic();
+    initFilterBar();
+    initScrollProgress();
+    fetchMemes(true);
 
-    // Scroll Infini
     const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isLoading && !["favoris", "random_mode", "upload", "user_uploads"].includes(currentSearch)) {
+        const canLoadMore = !["favoris", "random_mode"].includes(STATE.currentSearch);
+        if (entries[0].isIntersecting && !STATE.isLoading && canLoadMore) {
             fetchMemes();
         }
     }, { threshold: 0.1 });
-    if (scrollAnchor) observer.observe(scrollAnchor);
+    
+    if (STATE.scrollAnchor) observer.observe(STATE.scrollAnchor);
 });
 
-// --- 2. FONCTIONS DE FLUX (API) ---
+// --- 2. LOGIQUE DES LIKES PERSISTANTS ---
+function getPersistentMeta(gifId) {
+    const storageKey = `meta_${gifId}`;
+    let stored = JSON.parse(localStorage.getItem(storageKey));
+
+    if (!stored) {
+        stored = { 
+            likes: Math.floor(Math.random() * 800) + 50,
+            isLiked: false 
+        };
+        localStorage.setItem(storageKey, JSON.stringify(stored));
+    }
+    return stored;
+}
+
+function handleLike(btn) {
+    const id = btn.dataset.id;
+    const storageKey = `meta_${id}`;
+    let data = getPersistentMeta(id);
+
+    data.isLiked = !data.isLiked;
+    data.likes += data.isLiked ? 1 : -1;
+
+    localStorage.setItem(storageKey, JSON.stringify(data));
+
+    btn.classList.toggle('liked', data.isLiked);
+    btn.querySelector('.icon').textContent = data.isLiked ? '❤️' : '♡';
+    btn.querySelector('.count').textContent = data.likes;
+    
+    btn.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.3)' },
+        { transform: 'scale(1)' }
+    ], { duration: 300, easing: 'ease-out' });
+}
+
+// --- 3. MOTEUR API ---
 async function fetchMemes(isNewSearch = false) {
-    if (isLoading) return;
-    isLoading = true;
+    if (STATE.isLoading) return;
+    STATE.isLoading = true;
 
     if (isNewSearch) {
-        currentOffset = 0;
-        container.innerHTML = "";
+        STATE.currentOffset = 0;
+        STATE.container.innerHTML = "";
         showSkeletons();
-        window.scrollTo(0,0);
     }
 
-    const endpoint = currentSearch ? 'search' : 'trending';
-    const queryParam = currentSearch ? `&q=${encodeURIComponent(currentSearch)}` : '';
+    const isTrending = STATE.currentSearch === "";
+    const url = new URL(isTrending ? CONFIG.ENDPOINTS.trending : CONFIG.ENDPOINTS.search);
     
+    url.searchParams.append('api_key', CONFIG.API_KEY);
+    url.searchParams.append('limit', CONFIG.LIMIT);
+    url.searchParams.append('offset', STATE.currentOffset);
+    url.searchParams.append('rating', 'g');
+    if (!isTrending) url.searchParams.append('q', STATE.currentSearch);
+
     try {
-        const response = await fetch(`https://api.giphy.com/v1/gifs/${endpoint}?api_key=${API_KEY}&limit=10&offset=${currentOffset}${queryParam}&rating=g`);
+        const response = await fetch(url, { credentials: 'omit' });
         const result = await response.json();
-        appendMemes(processMemeData(result.data));
-        currentOffset += 10;
+        const memes = processMemeData(result.data);
+        
+        removeSkeletons();
+        appendMemes(memes);
+        STATE.currentOffset += CONFIG.LIMIT;
     } catch (error) {
         console.error("Erreur API:", error);
     } finally {
-        isLoading = false;
+        STATE.isLoading = false;
     }
 }
 
 function processMemeData(giphyData) {
-    const data = Array.isArray(giphyData) ? giphyData : [giphyData];
-    return data.map(gif => {
-        const gifId = gif.id || 'user-' + Date.now();
-        let storedData = JSON.parse(localStorage.getItem(gifId)) || { 
-            likes: Math.floor(Math.random() * 1000), 
-            isLiked: false 
-        };
-        return { 
-            id: gifId, 
-            title: gif.title || "Meme sans titre", 
-            img: gif.images ? (gif.images.fixed_height.webp || gif.images.fixed_height.url) : gif.img, 
-            likes: storedData.likes, 
-            isLiked: storedData.isLiked 
+    const rawData = Array.isArray(giphyData) ? giphyData : [giphyData];
+    return rawData.filter(gif => gif && gif.id).map(gif => {
+        const meta = getPersistentMeta(gif.id);
+        return {
+            id: gif.id,
+            title: gif.title?.trim() || "Orion Content",
+            img: gif.images?.fixed_height?.webp || gif.images?.fixed_height?.url,
+            likes: meta.likes,
+            isLiked: meta.isLiked
         };
     });
 }
 
-
+// --- 4. NAVIGATION & RANDOM ACTION ---
 async function handleSurprise() {
     const btn = document.getElementById('btn-random');
-    const icon = btn.querySelector('.nav-icon');
+    const icon = btn.querySelector('.nav-icon') || btn.querySelector('span');
+    
+    icon.style.transition = "transform 0.6s cubic-bezier(0.17, 0.89, 0.32, 1.49)";
+    icon.style.transform = "rotate(360deg)";
+    
+    STATE.currentSearch = "random_mode";
+    STATE.container.innerHTML = "";
+    showSkeletons();
 
-    icon.classList.add('rolling');
-    container.innerHTML = ""; 
-    showSkeletons(); 
-
-    setTimeout(async () => {
-        currentSearch = "random_mode";
-        try {
-            const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${API_KEY}&rating=g`);
-            const res = await response.json();
-            appendMemes(processMemeData(res.data));
-        } finally {
-            icon.classList.remove('rolling');
-        }
-    }, 800);
+    try {
+        const response = await fetch(`${CONFIG.ENDPOINTS.random}?api_key=${CONFIG.API_KEY}&rating=g`);
+        const result = await response.json();
+        const meme = processMemeData(result.data);
+        
+        removeSkeletons();
+        appendMemes(meme);
+        if (STATE.title) STATE.title.textContent = "Surprise ! 🎲";
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setTimeout(() => { icon.style.transform = "rotate(0deg)"; }, 600);
+    }
 }
 
+function initNavigation() {
+    const navMap = {
+        'btn-trending': () => { STATE.currentSearch = ""; fetchMemes(true); if (STATE.title) STATE.title.textContent = "Today Flow"; },
+        'btn-top': () => { STATE.currentSearch = "viral"; fetchMemes(true); if (STATE.title) STATE.title.textContent = "Top 24h 🏆"; },
+        'btn-random': () => handleSurprise(),
+        'btn-favorites': () => { 
+            STATE.currentSearch = "favoris"; 
+            const items = JSON.parse(localStorage.getItem('myFavorites')) || [];
+            STATE.container.innerHTML = items.length ? "" : "<p class='empty-msg'>Aucun favori...</p>";
+            appendMemes(items);
+            if (STATE.title) STATE.title.textContent = "Mes Favoris ⭐";
+        }
+    };
 
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (navMap[btn.id]) navMap[btn.id]();
+        };
+    });
+}
 
+// --- 5. NOUVELLE FONCTION PARTAGE (STYLE TIKTOK) ---
+async function shareMeme(title, url) {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: title,
+                text: "Regarde ce mème sur Orion MemeHub ! 🔥",
+                url: url
+            });
+        } catch (err) {
+            console.log("Partage annulé");
+        }
+    } else {
+        navigator.clipboard.writeText(url);
+        alert("Lien copié ! ✨");
+    }
+}
+
+// --- 6. UI RENDERING (CORRIGÉ) ---
 function appendMemes(memesArray) {
-    const skeletons = container.querySelectorAll('.skeleton');
-    skeletons.forEach(s => s.remove());
+    const fragment = document.createDocumentFragment();
+    const favs = JSON.parse(localStorage.getItem('myFavorites')) || [];
 
-    const favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-
-    memesArray.forEach((meme) => {
-        const isFav = favorites.some(fav => fav.id === meme.id);
+    memesArray.forEach(meme => {
+        const isFav = favs.some(f => f.id === meme.id);
         const card = document.createElement("div");
         card.className = "grid";
         card.innerHTML = `
-            <img src="${meme.img}" alt="${meme.title}" loading="lazy">
+            <img src="${meme.img}" alt="${meme.title}" loading="lazy" crossorigin="anonymous">
             <h4>${meme.title}</h4>
             <div class="card-btns">
                 <button class="like-btn ${meme.isLiked ? 'liked' : ''}" data-id="${meme.id}">
                     <span class="icon">${meme.isLiked ? '❤️' : '♡'}</span> 
                     <span class="count">${meme.likes}</span>
                 </button>
-                <button class="fav-btn" style="background:transparent; color: ${isFav ? '#FFD700' : 'inherit'}">
-                    ${isFav ? '⭐' : '☆'}
+                <button class="fav-btn" data-tooltip="Favoris">
+                    <span class="fav-icon" style="color:${isFav ? '#FFD700' : 'inherit'}">${isFav ? '⭐' : '☆'}</span>
                 </button>
-                <button class="share-btn">⌲</button>
+                <button class="share-btn" data-tooltip="Partager">⌲</button>
             </div>
         `;
-        container.appendChild(card);
 
-        card.querySelector('.like-btn').addEventListener('click', (e) => handleLike(e.currentTarget));
-        card.querySelector('.fav-btn').addEventListener('click', (e) => toggleFavorite(meme, e.currentTarget));
-        card.querySelector('.share-btn').addEventListener('click', () => handleNativeShare(meme));
+        // Événements
+        card.querySelector('.like-btn').onclick = (e) => handleLike(e.currentTarget);
+        card.querySelector('.fav-btn').onclick = (e) => toggleFavorite(meme, e.currentTarget);
+        card.querySelector('.share-btn').onclick = () => shareMeme(meme.title, meme.img);
+
+        fragment.appendChild(card);
     });
+    STATE.container.appendChild(fragment);
 }
 
-function initSearch() {
-    const searchInput = document.querySelector('.head input');
-    if (!searchInput) return;
-
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            currentSearch = searchInput.value.trim();
-            if (currentSearch !== "") {
-                switchToView('memes');
-                fetchMemes(true);
-            }
-        }
-    });
-}
-
-function initNavigation() {
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-
-            const action = this.id;
-
-            if (action === 'btn-trending') { currentSearch = ""; switchToView('memes'); fetchMemes(true); }
-            if (action === 'btn-top') { currentSearch = "viral"; switchToView('memes'); fetchMemes(true); }
-            if (action === 'btn-favorites') {
-                currentSearch = "favoris";
-                switchToView('memes');
-                container.innerHTML = "";
-                appendMemes(JSON.parse(localStorage.getItem('myFavorites')) || []);
-            }
-            if (action === 'btn-my-posts') {
-                currentSearch = "user_uploads";
-                switchToView('memes');
-                container.innerHTML = "";
-                const uploads = JSON.parse(localStorage.getItem('myUploads')) || [];
-                uploads.length > 0 ? appendMemes(processMemeData(uploads)) : container.innerHTML = "<p>Aucun mème publié.</p>";
-            }
-            if (action === 'btn-upload') {
-                currentSearch = "upload";
-                switchToView('upload');
-            }
-        });
-    });
-}
-
-function switchToView(view) {
-    if (view === 'memes') {
-        container.style.display = 'grid';
-        uploadSection.style.display = 'none';
-        scrollAnchor.style.display = 'block';
-        updateGreeting();
-    } else {
-        container.style.display = 'none';
-        uploadSection.style.display = 'block';
-        scrollAnchor.style.display = 'none';
-        document.getElementById('dynamic-greeting').textContent = "Partage ton talent !";
-    }
-}
-
-// --- 4. LOGIQUE D'UPLOAD ---
-function initUploadLogic() {
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const preview = document.getElementById('preview-container');
-    const imgPreview = document.getElementById('gif-preview');
-    const submitBtn = document.getElementById('submit-upload');
-
-    if(!dropZone) return;
-
-    dropZone.addEventListener('click', () => fileInput.click());
-    
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && file.type === "image/gif") {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                imgPreview.src = event.target.result;
-                dropZone.style.display = 'none';
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    submitBtn.addEventListener('click', function() {
-        const title = document.getElementById('meme-title').value;
-        if(!title) return alert("Mets un titre !");
-
-        this.disabled = true;
-        document.getElementById('progress-container').style.display = 'block';
-        let progress = 0;
-
-        const interval = setInterval(() => {
-            progress += 10;
-            document.getElementById('progress-fill').style.width = progress + "%";
-            document.getElementById('progress-text').textContent = `Envoi... ${progress}%`;
-
-            if (progress >= 100) {
-                clearInterval(interval);
-                saveUserMeme({
-                    title: title,
-                    img: imgPreview.src,
-                    id: 'user-' + Date.now()
-                });
-                showSuccess();
-            }
-        }, 200);
-    });
-}
-
-function saveUserMeme(newMeme) {
-    let myUploads = JSON.parse(localStorage.getItem('myUploads')) || [];
-    myUploads.unshift(newMeme);
-    if (myUploads.length > 50) myUploads = myUploads.slice(0, 50);
-    localStorage.setItem('myUploads', JSON.stringify(myUploads));
-}
-
-function showSuccess() {
-    document.querySelector('.upload-card').innerHTML = `
-        <div style="padding:40px; text-align:center;">
-            <h2>🎉 Publié !</h2>
-            <p>Retrouve ton mème dans "Mes Publications".</p>
-            <button onclick="location.reload()" class="publish-btn">Continuer</button>
-        </div>`;
-}
-
-// --- 5. UTILITAIRES (GREETING, LIKE, ETC.) ---
-function updateGreeting() {
-    const h = new Date().getHours();
-    const msg = h<12 ? "Bonjour ! ☕" : h<18 ? "Bon après-midi ! " : "Bonne soirée ! ";
-    document.getElementById('dynamic-greeting').textContent = msg;
-}
-
-function showSkeletons() {
-    for(let i=0; i<6; i++) {
-        const skel = document.createElement('div');
-        skel.className = "grid skeleton";
-        container.appendChild(skel);
-    }
-}
-function handleLike(btn) {
-    const gifId = btn.getAttribute('data-id');
-    let data = JSON.parse(localStorage.getItem(gifId)) || { likes: 0, isLiked: false };
-    
-    data.isLiked = !data.isLiked;
-    data.likes += data.isLiked ? 1 : -1;
-    localStorage.setItem(gifId, JSON.stringify(data));
-
-    btn.classList.toggle('liked', data.isLiked);
-    btn.querySelector('.icon').textContent = data.isLiked ? '❤️' : '♡';
-    btn.querySelector('.count').textContent = data.likes;
-
-    btn.style.animation = 'none'; // Reset
-    btn.offsetHeight; // Trigger reflow
-    btn.style.animation = 'pop 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49)';
-}
-
-
-
-
-
-
+// --- 7. UTILS ---
 function toggleFavorite(meme, btn) {
     let favs = JSON.parse(localStorage.getItem('myFavorites')) || [];
     const idx = favs.findIndex(f => f.id === meme.id);
+    const icon = btn.querySelector('.fav-icon');
+
     if (idx === -1) {
         favs.push(meme);
-        btn.textContent = "⭐"; btn.style.color = "#FFD700";
+        icon.textContent = "⭐"; icon.style.color = "#FFD700";
     } else {
         favs.splice(idx, 1);
-        btn.textContent = "☆"; btn.style.color = "inherit";
+        icon.textContent = "☆"; icon.style.color = "inherit";
     }
     localStorage.setItem('myFavorites', JSON.stringify(favs));
 }
 
-function handleNativeShare(meme) {
-    navigator.share ? navigator.share({title: meme.title, url: meme.img}) : alert("Lien copié !");
-}
-
-
-
-/* GESTION DU THÈME - MEMEHUB
-   Logique : Dark Mode par défaut, persistance via LocalStorage
-*/
-
-// 1. Sélection des éléments
-const toggleSwitch = document.querySelector('.theme-switch input');
-const rootElement = document.documentElement;
-
-// 2. Fonction pour appliquer le thème
-function applyTheme(theme) {
-    if (theme === 'light') {
-        rootElement.setAttribute('data-theme', 'light');
-        if (toggleSwitch) toggleSwitch.checked = false; // Switch éteint pour Light
-        localStorage.setItem('theme', 'light');
-    } else {
-        rootElement.setAttribute('data-theme', 'dark');
-        if (toggleSwitch) toggleSwitch.checked = true; // Switch allumé pour Dark
-        localStorage.setItem('theme', 'dark');
-    }
-}
-
-// 3. Initialisation au chargement de la page
-function initTheme() {
-    // On récupère le choix précédent, s'il n'existe pas, on met 'dark'
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    applyTheme(savedTheme);
-}
-
-// 4. Écouteur de changement sur le bouton Switch
-if (toggleSwitch) {
-    toggleSwitch.addEventListener('change', (e) => {
-        // Si coché = Dark, si décoché = Light
-        const themeToApply = e.target.checked ? 'dark' : 'light';
-        applyTheme(themeToApply);
-        
-        // Optionnel : Petit feedback console pour le debug
-        console.log(`Thème changé en : ${themeToApply}`);
+function initSearch() {
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    input.addEventListener('keyup', function(event) {
+        event.preventDefault();
+        if (event.key === 'Enter') {
+            const query = input.value.trim();
+            if (query !== "") {
+                STATE.currentSearch = query;
+                if (STATE.title) STATE.title.textContent = `Résultats : ${query}`;
+                fetchMemes(true);
+                input.blur(); 
+            }
+        }
     });
 }
 
-// Lancement immédiat
-initTheme();
+function initFilterBar() {
+    document.querySelectorAll('.filter-tag').forEach(tag => {
+        tag.onclick = () => {
+            document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+            tag.classList.add('active');
+            STATE.currentSearch = tag.dataset.category;
+            fetchMemes(true);
+        };
+    });
+}
+
+function initScrollProgress() {
+    const bar = document.getElementById('scroll-progress');
+    if (!bar) return;
+    window.onscroll = () => {
+        const winScroll = document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        bar.style.width = scrolled + "%";
+    };
+}
+
+function showSkeletons() {
+    for(let i=0; i<8; i++) {
+        const s = document.createElement('div');
+        s.className = "grid skeleton";
+        STATE.container.appendChild(s);
+    }
+}
+
+function removeSkeletons() {
+    STATE.container.querySelectorAll('.skeleton').forEach(s => s.remove());
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const toggle = document.getElementById('checkbox');
+    if (toggle) {
+        toggle.checked = (saved === 'dark');
+        toggle.onchange = (e) => {
+            const t = e.target.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('theme', t);
+        };
+    }
+}
