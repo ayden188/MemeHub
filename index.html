@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="stylesheet" href="p3.png">
+    <title>MemeHub — La Galerie de Mèmes Ultra-Fluide</title>
+<meta name="description" content="Découvrez, likez et partagez les meilleurs mèmes du web avec Orion MemeHub. Une expérience fluide, rapide et moderne propulsée par l'API Giphy.">
+<meta name="keywords" content="mèmes, gifs, divertissement, giphy, orion, rire, réseaux sociaux">
+<meta name="author" content="Ton Nom ou Orion System">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ton-pseudo.github.io/meme-hub/">
+<meta property="og:title" content="Orion MemeHub — Flow de Mèmes Infini">
+<meta property="og:description" content="Le meilleur de l'humour en un clic. Partage tes GIFs préférés instantanément.">
+<meta property="og:image" content="https://ton-pseudo.github.io/meme-hub/assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Orion MemeHub ">
+<meta name="twitter:description" content="L'expérience mème ultime, fluide et rapide.">
+<meta name="twitter:image" content="https://ton-pseudo.github.io/meme-hub/assets/preview.png">
+
+<link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="s.css">
     <title>Memhub</title>
 </head>
@@ -12,7 +26,6 @@
 <nav class="head">
 <div class="logo" style="display: flex; align-items: flex-end; cursor: pointer; gap: 10px;">
   <a href=""> <img src="p3.png" alt="" style="width: 60px;"></a>
-  <a href="" style="color: white; text-decoration: none;"><h1>Meme<span style="color: var(--primary);">Hub</span></h1></a> 
 </div>
 <input id="search-input" type="text" placeholder=" 🔎✨ Chercher un mème">
 
@@ -112,17 +125,16 @@
 
 <section id="upload-section" class="upload-container" style="display: none;">
     <div class="upload-card">
-        <h3>Partage ton meilleur GIF 🚀</h3>
+        <h3 style="margin-bottom: 10px;">Partage ton meilleur GIF </h3>
         
         <div id="drop-zone" class="drop-zone">
-            <span class="drop-icon">📁</span>
-            <p>Glisse ton GIF ici ou <span>parcourir</span></p>
+            <p>Glisse ton GIF ici </p>
             <input type="file" id="file-input" accept="image/gif" hidden>
         </div>
 
       <div id="preview-container" class="preview-hidden">
     <div class="upload-form">
-        <input type="text" id="meme-title" placeholder="Donne un titre épique...">
+        <input type="text" id="meme-title" placeholder="Donne un titre épique..." style="margin-top: 10px;">
         
         <div id="progress-container" style="display: none; margin: 20px 0;">
             <div class="progress-bar">

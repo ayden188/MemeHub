@@ -196,9 +196,11 @@ input:focus {
 }
 
 .grid {
-    background: var(--bg-input);
+
+
+    background: var(--bg-input);    border: 1px solid var(--border);
+
     border-radius: 22px;
-    border: 1px solid var(--border);
     transition: all 0.4s ease;
     overflow: hidden;
     position: relative;
@@ -274,6 +276,19 @@ input:focus {
 
 .drop-zone:hover {
     background: var(--primary-glow);
+}
+
+.publish-btn{
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: #00ff8822;
+    border: 1px solid #00ff88;
+    color: #00ff889a;
+    font-weight: bold;
+    cursor: pointer;
+    
+  border: 2px solid var();
+
 }
 
 /* --- 8. DARK MODE SWITCH --- */
@@ -403,6 +418,9 @@ body{
     max-width: 100vh;
 
 }
+.publish-btn{
+  margin-top: 10px;
+}
   /* Header */
   .head {
     padding: 14px 20px;
@@ -411,13 +429,12 @@ body{
   #search-input {
     width: 45%;
   }
-  
+
   .main-container {
     grid-template-columns: 80px 1fr;
     gap: 20px;
   }
   .sidebar {
-    border-radius: 1px;
     padding: 15px 10px;
     display: flex;
     justify-content: space-between;
@@ -485,6 +502,7 @@ body{
   .main-container {
     grid-template-columns: 1fr;
     padding: 12px;
+    overflow-x: hidden;
   }
   .sidebar {
     position: fixed !important;
@@ -492,7 +510,7 @@ body{
     top: auto !important;              /* 🔥 annule sticky */
     left: 50%;
     transform: translateX(-50%);
-    width: calc(100% - 24px);
+    width: calc(100% - 23px);
     height: auto;
     flex-direction: row;
     justify-content: space-around;
@@ -502,6 +520,8 @@ body{
     backdrop-filter: blur(12px);
     background: var(--bg-card);
         max-width: 100vh;
+            border-radius: 1px;
+
 
   }
 
