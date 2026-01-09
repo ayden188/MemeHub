@@ -34,13 +34,16 @@ Refactorisé par Gemini - Design Original conservé
 
 /* --- 2. RESET & BASE --- */
 * {
+    
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
-
+html {
+    scroll-behavior: smooth;
+}
 body {
     background-color: var(--bg-body);
     color: var(--text-main);
@@ -70,6 +73,8 @@ body {
     gap: 30px;
     list-style: none;
 }
+
+
 
 .lien ul li {
     cursor: pointer;
@@ -475,10 +480,14 @@ body{
     justify-content: center;
   }
 }
-
+.logo-image{
+    width:60px;
+}
 /* -------- MOBILE -------- */
 @media (max-width: 768px) {
-
+.logo-image{
+    width:48px;
+}
   body {
     max-width: 100vh;
     overflow-x: hidden;
@@ -553,12 +562,12 @@ body{
   /* Filtres */
   .filter-bar {
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 2px;
   }
 
   .filter-tag {
     font-size: 0.8rem;
-    padding: 6px 14px;
+    padding: 6px 14px!important;
   }
 
   /* Grid GIF */
@@ -584,8 +593,8 @@ body{
   }
 
   .filter-tag {
-    font-size: 0.75rem;
-    padding: 6px 12px;
+    font-size: 0.60rem;
+    padding: 2px 6px;
   }
 
   .grid img {
