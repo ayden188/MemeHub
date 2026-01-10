@@ -418,7 +418,9 @@ input:checked + .slider:before {
 }
 /* -------- TABLET -------- */
 @media (max-width: 992px) {
-
+main .main-container{
+    padding: 0;
+}
 body{
     max-width: 100vh;
 
@@ -436,8 +438,9 @@ body{
   }
 
   .main-container {
-    grid-template-columns: 80px 1fr;
+    margin-top: 40px;
     gap: 20px;
+    padding: 0 !important;
   }
   .sidebar {
     padding: 15px 10px;
@@ -451,7 +454,7 @@ body{
   .side-nav{
   border-radius: 0px;
   width: 100%;
-  gap: 10px;
+  
   }
 
   .brand-name,
@@ -553,6 +556,7 @@ body{
   .hero-content {
     padding-bottom: 120px;
     padding-top: 5px;
+    border-radius: 0;
     padding-left: 10px;
     padding-right: 10px;
         max-width: 100vh;
