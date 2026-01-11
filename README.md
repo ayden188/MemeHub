@@ -17,15 +17,11 @@ Orion MemeHub est une plateforme web ultra-fluide dédiée à la découverte et 
 🛠️ Prouesses Techniques & Optimisation
 Le développement d'Orion MemeHub a permis de résoudre des problématiques complexes de performance front-end :
 
-1. Gestion de la Mémoire (Virtual Scroller)
+. Gestion de la Mémoire (Virtual Scroller)
 Pour garantir une navigation fluide même après des heures de défilement, le moteur limite le nombre d'éléments dans le DOM à 50 mèmes. Au-delà, les éléments les plus anciens sont automatiquement recyclés.
 
-2. Algorithme d'Insertion Chronologique
-Gestion intelligente du positionnement des éléments :
-
-prepend() pour les publications utilisateur (affichage immédiat en haut).
 
 appendChild() pour le scroll infini (chargement naturel vers le bas).
 
-3. Persistance des Données
+. Persistance des Données
 Mise en place d'une architecture de stockage locale permettant de conserver vos uploads et vos favoris même après la fermeture du navigateur.
