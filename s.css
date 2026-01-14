@@ -4,12 +4,9 @@
 ██║  ██║██╔══██╗██║██║   ██║██║╚██╗██║
 ██████╔╝██║  ██║██║╚██████╔╝██║ ╚████║
 ╚═════╝ ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝ 
-Refactorisé par Gemini - Design Original conservé
 */
 
-/* --- 1. VARIABLES & THÈMES --- */
 :root {
-    /* Mode Sombre (Défaut) */
     --primary: #6a6aad;
     --primary-glow: rgba(106, 106, 173, 0.3);
     --bg-body: #0f111a;      
@@ -22,7 +19,6 @@ Refactorisé par Gemini - Design Original conservé
 }
 
 [data-theme="light"] {
-    /* Mode Clair */
     --bg-body: #f4f7fb;      
     --bg-card: #ffffff;      
     --text-main: #1e293b;    
@@ -32,7 +28,6 @@ Refactorisé par Gemini - Design Original conservé
     --glass: rgba(0, 0, 0, 0.03);
 }
 
-/* --- 2. RESET & BASE --- */
 * {
     
     margin: 0;
@@ -50,7 +45,10 @@ body {
     overflow-x: hidden;
 }
 
-/* --- 3. NAVIGATION (HEADER) --- */
+.logo{
+     color: var(--primary-glow)
+}
+
 .head {
     justify-content: space-between;
     align-items: center;
@@ -555,6 +553,8 @@ border: none;
   }
 
   .hero-content {
+
+  margin-top: -30px;
     border: none;
     border-radius: 0;
         max-width: 100vh;
@@ -695,4 +695,36 @@ border: none;
     z-index: 1000;
     box-shadow: 0 0 10px var(--primary);
     transition: width 0.1s ease-out;
+}
+
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  color: var(--text-muted);
+  pointer-events: none; /* L'icône ne gêne pas le clic */
+}
+
+#search-input {
+  width: 100%;
+  padding: 12px 12px 12px 45px; /* On laisse de la place à gauche pour l'icône */
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+#search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+  outline: none;
 }
