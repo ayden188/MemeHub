@@ -451,10 +451,11 @@ body{
     max-width: 100vh;
 
   }
-  .side-nav{
+  nav .side-nav{
+border: none;
   border-radius: 0px;
-  width: 100%;
-  
+  min-width: 100%;
+
   }
 
   .brand-name,
@@ -494,6 +495,7 @@ body{
   body {
     max-width: 100vh;
     overflow-x: hidden;
+    background:var(--bg-card);
   }
 
   /* Header mobile */
@@ -519,13 +521,14 @@ body{
   .sidebar {
     position: fixed !important;
     bottom: 0px !important;
-    top: auto !important;              /* 🔥 annule sticky */
+    top: auto !important;          
     left: 50%;
     transform: translateX(-50%);
-    width: calc(100% - 23px);
+    width: calc(100% );
     height: auto;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
+    text-align: center;
     padding: 0;
     border-radius: 20px;
     z-index: 9999;
@@ -533,7 +536,6 @@ body{
     background: var(--bg-card);
         max-width: 100vh;
             border-radius: 1px;
-
 
   }
 
@@ -552,29 +554,34 @@ body{
     display: none;
   }
 
-  /* Hero */
   .hero-content {
-    padding-bottom: 120px;
-    padding-top: 5px;
+    border: none;
     border-radius: 0;
-    padding-left: 10px;
-    padding-right: 10px;
         max-width: 100vh;
 
   }
+.filter-bar {
+  flex-wrap: wrap;
+  overflow-x: auto !important;  
+ scroll-snap-type: x mandatory;
+  gap: 10px;
+  padding: 10px;
+}
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}
+.filter-bar {
+  scrollbar-width: none;
+}
 
-  /* Filtres */
-  .filter-bar {
-    flex-wrap: wrap;
-    gap: 2px;
-  }
-
+.filter-bar > * {
+  scroll-snap-align: start; /* Les éléments s'alignent au début au décollage */
+  flex: 0 0 auto; /* Empêche les éléments de rétrécir */
+}
   .filter-tag {
     font-size: 0.8rem;
     padding: 6px 14px!important;
   }
-
-  /* Grid GIF */
   .meme-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
@@ -645,9 +652,7 @@ body{
     display: flex;
     gap: 12px;
     margin: 20px 0;
-    overflow-x: auto;
     padding-bottom: 10px;
-    scrollbar-width: none; /* Cache la scrollbar sur Firefox */
 }
 
 .filter-bar::-webkit-scrollbar {
